@@ -16,9 +16,9 @@ from lerobot.datasets.utils import (
     write_info,
     write_task,
 )
-from libero_utils.config import LIBERO_FEATURES
-from libero_utils.lerobot_utils import validate_all_metadata
-from libero_utils.libero_utils import load_local_episodes
+from pusht_utils.config import PUSHT_FEATURES
+from pusht_utils.lerobot_utils import validate_all_metadata
+from pusht_utils.pusht_utils import load_local_episodes
 from ray.runtime_env import RuntimeEnv
 from tqdm import tqdm
 
@@ -35,7 +35,7 @@ def setup_logger():
 
 class SaveLerobotDataset(PipelineStep):
     name = "Save Temp LerobotDataset"
-    type = "libero2lerobot"
+    type = "pusht2lerobot"
 
     def __init__(self, tasks: list[tuple[Path, Path, str]]):
         super().__init__()
@@ -52,9 +52,9 @@ class SaveLerobotDataset(PipelineStep):
         dataset = LeRobotDataset.create(
             repo_id=f"{input_h5.parent.name}/{input_h5.name}",
             root=output_path,
-            fps=20,
-            robot_type="franka",
-            features=LIBERO_FEATURES,
+            fps=10,
+            robot_type="unknown",
+            features=PUSHT_FEATURES,
         )
 
         logger.info(f"start processing for {input_h5}, saving to {output_path}")
@@ -73,7 +73,7 @@ class SaveLerobotDataset(PipelineStep):
 
 class AggregateDatasets(PipelineStep):
     name = "Aggregate Datasets"
-    type = "libero2lerobot"
+    type = "pusht2lerobot"
 
     def __init__(self, raw_dirs: list[Path], aggregated_dir: Path):
         super().__init__()
@@ -224,7 +224,7 @@ class AggregateDatasets(PipelineStep):
 
 class DeleteTempData(PipelineStep):
     name = "Delete Temp Data"
-    type = "libero2lerobot"
+    type = "pusht2lerobot"
 
     def __init__(self, temp_dirs: list[Path]):
         super().__init__()
@@ -318,7 +318,7 @@ def main(
 
     if push_to_hub:
         assert repo_id is not None
-        tags = ["LeRobot", "libero", "franka"]
+        tags = ["LeRobot", "pusht", "unknown"]
         tags.extend([src_path.name for src_path in src_paths])
         LeRobotDataset(
             repo_id=repo_id,
