@@ -190,12 +190,10 @@ def main(args):
                     model_input = np.concatenate([agent_position, block_position, [block_angle]], dtype=np.float64)
                     
                     # Predict action
-                    # raw_action, _ = model.predict(model_input, deterministic=False)
                     raw_action, _, _, _ = model.get_action_and_value(torch.from_numpy(model_input).float().to('cuda').unsqueeze(0))
                     raw_action = raw_action[0].cpu().numpy()
                     raw_action += np.random.normal(loc=0, scale=0.01 * (attempt_num), size=raw_action.shape)
                     pos_agent = np.array(env.agent.position)
-                    # action = pos_agent + (raw_action-0.5).clip(-0.5, 0.5) * 6
                     action = pos_agent + raw_action * 2
                     
                     # Step environment
